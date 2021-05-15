@@ -20,6 +20,22 @@ spring:
         - a
         - b
         - c
+    compatibility-verifier:
+      enabled: true # 启用兼容校验
+      compatible-boot-versions: # 兼容的SpringBoot版本
+        - 2.4.x
+        - 2.5.x
+    util:
+      enabled: true # 启用cloud相关工具类
+    inetutils:
+      default-hostname: localhost # 找不到网卡的默认值
+      default-ip-address: 127.0.0.1
+      timeout-seconds: 1 # InetAddress::getHostname查找网卡的超时时间
+      use-only-site-local-interfaces: false
+      ignored-interfaces:
+        - 128.0.0.1
+      preferred-networks:
+        - 127.0.0.1
   config:
     use-legacy-processing: false
     allow-override: false # 是否允许BootstrapConfiguration获取的所有属性覆盖原本环境的属性

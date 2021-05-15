@@ -19,6 +19,6 @@ public class EnvComponent {
 
 	@PostConstruct
 	public void getEnv() {
-		System.out.println(1);
+		System.out.println("BootstrapContext Environment success");
 	}
 }

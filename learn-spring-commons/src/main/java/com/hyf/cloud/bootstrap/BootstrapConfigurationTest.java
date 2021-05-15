@@ -18,7 +18,7 @@ public class BootstrapConfigurationTest {
 
 	static class Person {
 		public Person() {
-			System.out.println(1);
+			System.out.println("BootstrapConfiguration success!");
 		}
 	}
 }
