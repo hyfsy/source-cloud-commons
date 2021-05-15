@@ -62,6 +62,7 @@ public class RefreshEventListener implements SmartApplicationListener {
 		}
 	}
 
+	// 启动完毕后再处理刷新事件
 	public void handle(ApplicationReadyEvent event) {
 		this.ready.compareAndSet(false, true);
 	}

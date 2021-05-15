@@ -37,7 +37,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Scope("refresh")
+@Scope("refresh") // 作用在这
 @Documented
 public @interface RefreshScope {
 

@@ -38,6 +38,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
 /**
+ * BootstrapContext 用来加载 BootstrapConfiguration配置类
+ *
  * This class uses {@link SpringFactoriesLoader} to load {@link BootstrapConfiguration}
  * entries from {@code spring.factories}. The classes are then loaded so they can be
  * sorted using {@link AnnotationAwareOrderComparator#sort(List)}. This class is a

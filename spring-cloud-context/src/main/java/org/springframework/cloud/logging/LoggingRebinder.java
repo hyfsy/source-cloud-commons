@@ -37,6 +37,8 @@ import org.springframework.core.env.Environment;
  * Listener that looks for {@link EnvironmentChangeEvent} and rebinds logger levels if any
  * changed.
  *
+ * 日志级别的重新绑定
+ *
  * @author Dave Syer
  * @author Olga Maciaszek-Sharma
  *
@@ -59,6 +61,7 @@ public class LoggingRebinder implements ApplicationListener<EnvironmentChangeEve
 		if (this.environment == null) {
 			return;
 		}
+		// 获取日志系统，刷新所有日志级别
 		LoggingSystem system = LoggingSystem.get(LoggingSystem.class.getClassLoader());
 		setLogLevels(system, this.environment);
 	}

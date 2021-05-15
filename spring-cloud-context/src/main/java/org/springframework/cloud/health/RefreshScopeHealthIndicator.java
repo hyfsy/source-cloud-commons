@@ -49,9 +49,12 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 		if (refreshScope != null) {
 			Map<String, Exception> errors = new HashMap<>(refreshScope.getErrors());
 			errors.putAll(this.rebinder.getErrors());
+
+			// 判断是否存在异常，没有则为 UP 状态
 			if (errors.isEmpty()) {
 				builder.up();
 			}
+			// 关闭状态，并在页面上展示异常和详细日志
 			else {
 				builder.down();
 				if (errors.size() == 1) {

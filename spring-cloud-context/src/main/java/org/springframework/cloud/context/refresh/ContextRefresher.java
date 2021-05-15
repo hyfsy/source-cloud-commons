@@ -97,9 +97,13 @@ public abstract class ContextRefresher {
 	}
 
 	public synchronized Set<String> refreshEnvironment() {
+		// 获取更新环境前的属性
 		Map<String, Object> before = extract(this.context.getEnvironment().getPropertySources());
+		// 更新环境
 		updateEnvironment();
+		// 获取更新环境后改变的属性
 		Set<String> keys = changes(before, extract(this.context.getEnvironment().getPropertySources())).keySet();
+		// 发布刷新事件
 		this.context.publishEvent(new EnvironmentChangeEvent(this.context, keys));
 		return keys;
 	}

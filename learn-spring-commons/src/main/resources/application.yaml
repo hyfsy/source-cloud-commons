@@ -1,0 +1,32 @@
+server:
+  port: 8082
+#  servlet:
+#    context-path: /
+
+spring:
+  boot:
+    enableautoconfiguration: true # 启用自动装配，优先
+  cloud:
+    bootstrap: # bootstrap属性放此处无效，应该其初始化时还未解析该文件，可通过添加spring-cloud-starter-bootstrap依赖激活
+      enabled: true # 是否启用
+      use-legacy-processing: true # 任意一个为true都会启用
+      name: abc # 文件名
+      location: E:// # 文件路径
+      additional-location: # 日志额外路径
+      sources: # @BootstrapConfiguration属性源，多个,分隔
+    refresh:
+      enabled: true # 启用配置的刷新
+      additional-property-sources-to-retain: # 刷新属性源时额外拷贝的环境属性（PropertiesSource名称）
+        - a
+        - b
+        - c
+  config:
+    use-legacy-processing: false
+    allow-override: false # 是否允许BootstrapConfiguration获取的所有属性覆盖原本环境的属性
+    override-none: false # allow-override为true的情况下，是否什么都不覆盖的添加到环境中，优先
+    override-system-properties: true # allow-override为true的情况下，是否覆盖系统属性，之后
+  profiles:
+    active:
+      - dev
+      - test
+    include: a,b,c

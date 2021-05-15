@@ -50,6 +50,7 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		// SpringBoot 2.4 重构的属性配置架构
 		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader, new DefaultBootstrapContext(),
 				activeProfiles);
 

@@ -64,6 +64,8 @@ import static org.springframework.cloud.util.PropertyUtils.bootstrapEnabled;
 import static org.springframework.cloud.util.PropertyUtils.useLegacyProcessing;
 
 /**
+ * Bootstrap容器的启动监听处理，环境准备完毕启动，应用上下文准备完毕（未refresh）关闭
+ *
  * A listener that prepares a SpringApplication (e.g. populating its Environment) by
  * delegating to {@link ApplicationContextInitializer} beans in a separate bootstrap
  * context. The bootstrap context is a SpringApplication created from sources defined in
@@ -100,6 +102,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			return;
 		}
 		// don't listen to events in a bootstrap context
+		// BootstrapContext启动时也会回调这个方法
 		if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			return;
 		}
@@ -112,6 +115,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		}
 		if (context == null) {
 			context = bootstrapServiceContext(environment, event.getSpringApplication(), configName);
+			// 监听application关闭时关闭bootstrap
 			event.getSpringApplication().addListeners(new CloseContextOnFailureApplicationListener(context));
 		}
 
@@ -139,13 +143,17 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		}
 	}
 
+	/** 启动一个 BootstrapContext 上下文，作为当前启动的应用上下文的父容器 */
 	private ConfigurableApplicationContext bootstrapServiceContext(ConfigurableEnvironment environment,
 			final SpringApplication application, String configName) {
 		StandardEnvironment bootstrapEnvironment = new StandardEnvironment();
 		MutablePropertySources bootstrapProperties = bootstrapEnvironment.getPropertySources();
+		// 清空
 		for (PropertySource<?> source : bootstrapProperties) {
 			bootstrapProperties.remove(source.getName());
 		}
+
+		// 添加特有的bootstrap属性源
 		String configLocation = environment.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		String configAdditionalLocation = environment
 				.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");
@@ -170,6 +178,8 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			}
 			bootstrapProperties.addLast(source);
 		}
+
+		// 启动BootstrapContext
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder().profiles(environment.getActiveProfiles())
 				.bannerMode(Mode.OFF).environment(bootstrapEnvironment)
@@ -193,6 +203,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			// way to switch those off.
 			builderApplication.setListeners(filterListeners(builderApplication.getListeners()));
 		}
+		// 导入所有 @BootstrapConfiguration 的配置
 		builder.sources(BootstrapImportSelectorConfiguration.class);
 		final ConfigurableApplicationContext context = builder.run();
 		// gh-214 using spring.application.name=bootstrap to set the context id via
@@ -201,14 +212,18 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		// during the bootstrap phase.
 		context.setId("bootstrap");
 		// Make the bootstrap context a parent of the app context
+		// 设置为父容器，并添加一些属性方面的顺序处理
 		addAncestorInitializer(application, context);
 		// It only has properties in it now that we don't want in the parent so remove
 		// it (and it will be added back later)
+		// 移除bootstrap，准备合并
 		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
+		// 将bootstrap启动完毕后的环境属性添加到应用程序中
 		mergeDefaultProperties(environment.getPropertySources(), bootstrapProperties);
 		return context;
 	}
 
+	/** 过滤掉日志的监听器 */
 	private Collection<? extends ApplicationListener<?>> filterListeners(Set<ApplicationListener<?>> listeners) {
 		Set<ApplicationListener<?>> result = new LinkedHashSet<>();
 		for (ApplicationListener<?> listener : listeners) {
@@ -278,6 +293,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 				((AncestorInitializer) initializer).setParent(context);
 			}
 		}
+		// 给 应用上下文 添加一个初始化器，方便容器的相关处理（如父容器、属性配置顺序）
 		if (!installed) {
 			application.addInitializers(new AncestorInitializer(context));
 		}
@@ -344,6 +360,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 	}
 
+	/** 父容器初始化器，处理父容器的相关配置 */
 	private static class AncestorInitializer
 			implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
@@ -371,10 +388,13 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
+			// 对属性配置排序（bootstrap在后）
 			reorderSources(context.getEnvironment());
+			// 设置为父容器
 			new ParentContextApplicationContextInitializer(this.parent).initialize(context);
 		}
 
+		/** 此处重排序应用上下文的环境 */
 		private void reorderSources(ConfigurableEnvironment environment) {
 			PropertySource<?> removed = environment.getPropertySources().remove(DEFAULT_PROPERTIES);
 			if (removed instanceof ExtendedDefaultPropertySource) {
@@ -413,6 +433,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 	}
 
+	/** BootstrapContext特有的属性源类型 */
 	private static class ExtendedDefaultPropertySource extends SystemEnvironmentPropertySource
 			implements OriginLookup<String> {
 
@@ -480,6 +501,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 	}
 
+	/** BootstrapContext容器的失败关闭处理 */
 	private static class CloseContextOnFailureApplicationListener implements SmartApplicationListener {
 
 		private final ConfigurableApplicationContext context;

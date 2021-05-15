@@ -113,6 +113,7 @@ public class RefreshScope extends GenericScope
 	}
 
 	public void start(ContextRefreshedEvent event) {
+		// 急切初始化
 		if (event.getApplicationContext() == this.context && this.eager && this.registry != null) {
 			eagerlyInitialize();
 		}
@@ -121,6 +122,7 @@ public class RefreshScope extends GenericScope
 	private void eagerlyInitialize() {
 		for (String name : this.context.getBeanDefinitionNames()) {
 			BeanDefinition definition = this.registry.getBeanDefinition(name);
+			// refresh范围，非懒加载
 			if (this.getName().equals(definition.getScope()) && !definition.isLazyInit()) {
 				Object bean = this.context.getBean(name);
 				if (bean != null) {
@@ -140,6 +142,7 @@ public class RefreshScope extends GenericScope
 		}
 		// Ensure lifecycle is finished if bean was disposable
 		if (super.destroy(name)) {
+			// 所有配置的刷新事件，暂无地方监听
 			this.context.publishEvent(new RefreshScopeRefreshedEvent(name));
 			return true;
 		}

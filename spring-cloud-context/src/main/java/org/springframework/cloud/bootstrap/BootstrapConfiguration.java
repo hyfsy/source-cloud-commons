@@ -38,6 +38,6 @@ public @interface BootstrapConfiguration {
 	 * Excludes specific auto-configuration classes such that they will never be applied.
 	 * @return classes to exclude
 	 */
-	Class<?>[] exclude() default {};
+	Class<?>[] exclude() default {}; // 好像没用，注解没实际意义
 
 }

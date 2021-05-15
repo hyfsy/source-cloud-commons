@@ -33,11 +33,14 @@ import org.springframework.stereotype.Component;
  * Collects references to <code>@ConfigurationProperties</code> beans in the context and
  * its parent.
  *
+ * 为所有 @ConfigurationProperties的集合
+ *
  * @author Dave Syer
  */
 @Component
 public class ConfigurationPropertiesBeans implements BeanPostProcessor, ApplicationContextAware {
 
+	/** 仅仅存放所有的 ConfigurationPropertiesBean */
 	private Map<String, ConfigurationPropertiesBean> beans = new HashMap<>();
 
 	private ApplicationContext applicationContext;
@@ -56,6 +59,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 		if (applicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
 		}
+		// 父类中获取唯一的一个 ConfigurationPropertiesBeans
 		if (applicationContext.getParent() != null && applicationContext.getParent()
 				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			ConfigurableListableBeanFactory listable = (ConfigurableListableBeanFactory) applicationContext.getParent()
@@ -73,6 +77,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 		if (isRefreshScoped(beanName)) {
 			return bean;
 		}
+		// 创建一个包含 @ConfigurationProperties 注解的配置对象
 		ConfigurationPropertiesBean propertiesBean = ConfigurationPropertiesBean.get(this.applicationContext, bean,
 				beanName);
 		if (propertiesBean != null) {
@@ -85,6 +90,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 		if (this.refreshScope == null && !this.refreshScopeInitialized) {
 			this.refreshScopeInitialized = true;
 			for (String scope : this.beanFactory.getRegisteredScopeNames()) {
+				// RefreshScope 动态刷新配置
 				if (this.beanFactory.getRegisteredScope(
 						scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
 					this.refreshScope = scope;

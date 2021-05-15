@@ -54,8 +54,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	private final String propertyName;
 
+	/** 上下文名称和 ApplicationContext对象 */
 	private Map<String, AnnotationConfigApplicationContext> contexts = new ConcurrentHashMap<>();
 
+	/** 上下文的配置信息对应的对象 */
 	private Map<String, C> configurations = new ConcurrentHashMap<>();
 
 	private ApplicationContext parent;
@@ -105,13 +107,16 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return this.contexts.get(name);
 	}
 
+	/** 创建一个默认的应用上下文 */
 	protected AnnotationConfigApplicationContext createContext(String name) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		if (this.configurations.containsKey(name)) {
+			// 创建的容器添加 @Configuration
 			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
 				context.register(configuration);
 			}
 		}
+		// 添加默认的配置
 		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
 			if (entry.getKey().startsWith("default.")) {
 				for (Class<?> configuration : entry.getValue().getConfiguration()) {
@@ -188,8 +193,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	 */
 	public interface Specification {
 
+		// 上下文名称
 		String getName();
 
+		// @Configuration 配置上下文对象
 		Class<?>[] getConfiguration();
 
 	}

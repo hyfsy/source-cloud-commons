@@ -24,6 +24,8 @@ import org.springframework.core.env.Environment;
 /**
  * Event published to signal a change in the {@link Environment}.
  *
+ * 该事件会改变所有属性配置和日志级别配置，不管keys
+ *
  * @author Dave Syer
  *
  */

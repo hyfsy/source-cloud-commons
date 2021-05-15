@@ -45,6 +45,8 @@ public class LoggingSystemShutdownListener
 		shutdownLogging();
 	}
 
+	// 环境准备结束，BootstrapContext 启动之后立即销毁，并在ConfigFileApplicationListener执行前，
+	// 日志处于一段黑暗的时期，因为需要为日志系统提供可刷新级别的处理
 	private void shutdownLogging() {
 		// TODO: only enable if bootstrap and legacy
 		LoggingSystem loggingSystem = LoggingSystem.get(ClassUtils.getDefaultClassLoader());

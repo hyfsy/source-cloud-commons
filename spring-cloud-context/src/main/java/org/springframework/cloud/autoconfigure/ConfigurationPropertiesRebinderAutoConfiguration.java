@@ -31,9 +31,14 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Auto-configuration for {@link ConfigurationPropertiesRebinder}.
  *
+ * 重新绑定 @ConfigurationProperties 的配置的自动装配
+ *
+ * 该对象在spring.factories中存在两个相同的，因为默认的应用程序和BootstrapContext都需要
+ *
  * @author Dave Syer
  */
 @Configuration(proxyBeanMethods = false)
+// SpringBoot的属性绑定实例化（@ConfigurationProperties对象）
 @ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
 public class ConfigurationPropertiesRebinderAutoConfiguration
 		implements ApplicationContextAware, SmartInitializingSingleton {
@@ -45,12 +50,14 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		this.context = applicationContext;
 	}
 
+	/** 绑定属性集合 */
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
 	public static ConfigurationPropertiesBeans configurationPropertiesBeans() {
 		return new ConfigurationPropertiesBeans();
 	}
 
+	/** 属性绑定器，处理属性的重新绑定 */
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
 	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
@@ -58,6 +65,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		return rebinder;
 	}
 
+	/** 重新绑定父容器属性 */
 	@Override
 	public void afterSingletonsInstantiated() {
 		// After all beans are initialized explicitly rebind beans from the parent

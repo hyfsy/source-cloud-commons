@@ -55,6 +55,8 @@ import org.springframework.util.StringUtils;
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 /**
+ * 处理Bootstrap环境合并后的应用程序的更新（日志系统刷新等）
+ *
  * @author Dave Syer
  *
  */
@@ -73,6 +75,7 @@ public class PropertySourceBootstrapConfiguration
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 10;
 
+	/** 资源定位器是cloud的新功能，方便从各个地方加载配置属性到环境中 */
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
 
@@ -91,6 +94,7 @@ public class PropertySourceBootstrapConfiguration
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
+		// 环境中添加资源定位器获取到的属性
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
 			Collection<PropertySource<?>> source = locator.locateCollection(environment);
 			if (source == null || source.size() == 0) {
@@ -110,6 +114,7 @@ public class PropertySourceBootstrapConfiguration
 			composite.addAll(sourceList);
 			empty = false;
 		}
+		// 重置日志级别、更新激活的环境
 		if (!empty) {
 			MutablePropertySources propertySources = environment.getPropertySources();
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
@@ -119,9 +124,13 @@ public class PropertySourceBootstrapConfiguration
 					propertySources.remove(p.getName());
 				}
 			}
+			// 插入属性源
 			insertPropertySources(propertySources, composite);
+			// 重新初始化日志系统
 			reinitializeLoggingSystem(environment, logConfig, logFile);
+			// 设置日志级别
 			setLogLevels(applicationContext, environment);
+			// 将include的环境属性添加到active中
 			handleIncludedProfiles(environment);
 		}
 	}
@@ -176,12 +185,14 @@ public class PropertySourceBootstrapConfiguration
 			}
 			return;
 		}
+		// 啥都不覆盖
 		if (remoteProperties.isOverrideNone()) {
 			for (PropertySource<?> p : composite) {
 				propertySources.addLast(p);
 			}
 			return;
 		}
+		// 覆盖系统属性
 		if (propertySources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
 				for (PropertySource<?> p : reversedComposite) {
@@ -203,15 +214,22 @@ public class PropertySourceBootstrapConfiguration
 
 	private Environment environment(MutablePropertySources incoming) {
 		StandardEnvironment environment = new StandardEnvironment();
+		// 清空
 		for (PropertySource<?> source : environment.getPropertySources()) {
 			environment.getPropertySources().remove(source.getName());
 		}
+		// 添加进来的属性源
 		for (PropertySource<?> source : incoming) {
 			environment.getPropertySources().addLast(source);
 		}
 		return environment;
 	}
 
+	/**
+	 * 将include的环境添加到active中
+	 *
+	 * @param environment 应用程序环境对象
+	 */
 	private void handleIncludedProfiles(ConfigurableEnvironment environment) {
 		Set<String> includeProfiles = new TreeSet<>();
 		for (PropertySource<?> propertySource : environment.getPropertySources()) {

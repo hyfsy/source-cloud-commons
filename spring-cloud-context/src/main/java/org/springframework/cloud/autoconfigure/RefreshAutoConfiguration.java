@@ -90,18 +90,21 @@ public class RefreshAutoConfiguration {
 	 */
 	public static final String REFRESH_SCOPE_ENABLED = REFRESH_SCOPE_PREFIX + ".enabled";
 
+	/** 急切初始化refresh范围的bean，提供一些端点功能，如刷新所有配置事件的发布等 */
 	@Bean
 	@ConditionalOnMissingBean(RefreshScope.class)
 	public static RefreshScope refreshScope() {
 		return new RefreshScope();
 	}
 
+	/** 日志级别的重新绑定，通过监听EnvironmentChangeEvent事件 */
 	@Bean
 	@ConditionalOnMissingBean
 	public static LoggingRebinder loggingRebinder() {
 		return new LoggingRebinder();
 	}
 
+	/** 配置文件的重刷新 ? */
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapEnabled
@@ -110,6 +113,7 @@ public class RefreshAutoConfiguration {
 		return new LegacyContextRefresher(context, scope, properties);
 	}
 
+	/** 配置文件的重刷新 ? */
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapDisabled

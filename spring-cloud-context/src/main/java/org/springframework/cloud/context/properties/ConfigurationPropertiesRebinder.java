@@ -76,6 +76,7 @@ public class ConfigurationPropertiesRebinder
 		return this.errors;
 	}
 
+	/** 完全刷新当前容器的所有 @ConfigurationProperties 对象 */
 	@ManagedOperation
 	public void rebind() {
 		this.errors.clear();
@@ -135,6 +136,7 @@ public class ConfigurationPropertiesRebinder
 		if (this.applicationContext.equals(event.getSource())
 				// Backwards compatible
 				|| event.getKeys().equals(event.getSource())) {
+			// 刷新所有属性
 			rebind();
 		}
 	}

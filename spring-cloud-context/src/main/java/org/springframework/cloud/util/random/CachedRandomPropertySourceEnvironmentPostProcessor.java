@@ -30,6 +30,8 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 
 /**
+ * 缓存随机数
+ *
  * @author Ryan Baxter
  */
 @Configuration(proxyBeanMethods = false)
@@ -47,6 +49,7 @@ public class CachedRandomPropertySourceEnvironmentPostProcessor implements Envir
 				logger.trace("CachedRandomPropertySource already present");
 				return;
 			}
+			// 属性最后添加可缓存随机数的属性源
 			propertySources.addLast(new CachedRandomPropertySource(propertySource));
 			logger.trace("CachedRandomPropertySource added to Environment");
 		}

@@ -64,6 +64,8 @@ public class RestartListener implements SmartApplicationListener {
 		}
 		else if (input instanceof ContextRefreshedEvent) {
 			if (this.context != null && input.getSource().equals(this.context) && this.event != null) {
+				// 发布的是 ApplicationPreparedEvent 事件
+				// @see class doc
 				this.context.publishEvent(this.event);
 			}
 		}

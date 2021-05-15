@@ -75,6 +75,7 @@ public class GenericScope
 
 	private static final Log logger = LogFactory.getLog(GenericScope.class);
 
+	/** 刷新对象缓存，包装了对象的生命周期操作 */
 	private BeanLifecycleWrapperCache cache = new BeanLifecycleWrapperCache(new StandardScopeCache());
 
 	private String name = "generic";
@@ -83,10 +84,18 @@ public class GenericScope
 
 	private StandardEvaluationContext evaluationContext;
 
+	/**
+	 * 容器内所有对象名的 bytes形式的 UUID
+	 *
+	 * @see #setSerializationId
+	 */
 	private String id;
 
+	/** 刷新时的错误 */
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
 
+	/** 分段锁（刷新的对象名分段） */
+	// 调用方法用读锁，销毁对象用写锁
 	private ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	static RuntimeException wrapIfNecessary(Throwable throwable) {
@@ -245,8 +254,10 @@ public class GenericScope
 			BeanDefinition definition = registry.getBeanDefinition(name);
 			if (definition instanceof RootBeanDefinition) {
 				RootBeanDefinition root = (RootBeanDefinition) definition;
+				// 是范围代理对象
 				if (root.getDecoratedDefinition() != null && root.hasBeanClass()
 						&& root.getBeanClass() == ScopedProxyFactoryBean.class) {
+					// 是刷新范围的对象
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition().getScope())) {
 						root.setBeanClass(LockedScopedProxyFactoryBean.class);
 						root.getConstructorArgumentValues().addGenericArgumentValue(this);

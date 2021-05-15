@@ -23,6 +23,8 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 
 /**
+ * 缓存属性源，每次都先从缓存中获取，再从 RandomPropertySource 中获取
+ *
  * @author Ryan Baxter
  */
 public class CachedRandomPropertySource extends PropertySource<PropertySource> {
@@ -79,6 +81,7 @@ public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No random value found in cache for key and value, generating a new value");
 			}
+			// 包装的 RandomPropertySource
 			return getSource().getProperty("random." + type);
 		});
 	}

@@ -28,6 +28,8 @@ public abstract class PropertyUtils {
 
 	/**
 	 * Property name for spring boot legacy processing.
+	 *
+	 * 遗留配置：默认会初始化BootstrapContext，和上面的配置默认一个满足
 	 */
 	public static final String USE_LEGACY_PROCESSING_PROPERTY = "spring.config.use-legacy-processing";
 
