@@ -31,6 +31,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 /**
+ * 基于配置属性的服务发现客户端配置
+ *
  * Spring Boot auto-configuration for simple properties-based discovery client.
  *
  * @author Biju Kunjummen
@@ -58,6 +60,7 @@ public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListen
 		this.inet = inet;
 	}
 
+	/** 提供默认的服务实例和相关属性 */
 	@Bean
 	@ConditionalOnMissingBean
 	public SimpleDiscoveryProperties simpleDiscoveryProperties(
@@ -68,6 +71,7 @@ public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListen
 		return simple;
 	}
 
+	/** 通过配置的实例属性，构建一个服务发现客户端 */
 	@Bean
 	@Order
 	public DiscoveryClient simpleDiscoveryClient(SimpleDiscoveryProperties properties) {
@@ -84,6 +88,7 @@ public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListen
 		return 8080;
 	}
 
+	/** 设置服务器端口 */
 	@Override
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		port = webServerInitializedEvent.getWebServer().getPort();

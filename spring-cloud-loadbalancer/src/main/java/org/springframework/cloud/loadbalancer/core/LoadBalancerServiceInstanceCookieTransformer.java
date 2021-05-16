@@ -29,6 +29,8 @@ import org.springframework.http.HttpRequest;
 import org.springframework.util.StringUtils;
 
 /**
+ * 作用仅仅是将instance-id放入了请求的cookie中
+ * <p>
  * A {@link LoadBalancerRequestTransformer} that allows passing the {@code} instanceId) of
  * the {@link ServiceInstance} selected by the {@link LoadBalancerClient} in a cookie.
  *

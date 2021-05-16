@@ -1,4 +1,4 @@
-package com.hyf.cloud.bootstrap;
+package com.hyf.cloud.context.bootstrap;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.BootstrapContext;
@@ -22,8 +22,10 @@ public class CustomBootstrapper implements Bootstrapper {
 	@Override
 	public void intitialize(BootstrapRegistry registry) {
 
+		// 容器完全初始化完毕前提供的一种共享的对象注册机制
 		registry.registerIfAbsent(InnerPerson.class, context -> new InnerPerson());
 
+		// 转换为SpringBean
 		registry.addCloseListener(event -> {
 			BootstrapContext bootstrapContext = event.getBootstrapContext();
 			ConfigurableApplicationContext applicationContext = event.getApplicationContext();

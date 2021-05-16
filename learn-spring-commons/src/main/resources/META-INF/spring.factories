@@ -1,4 +1,4 @@
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-com.hyf.cloud.bootstrap.BootstrapConfigurationTest
+com.hyf.cloud.context.bootstrap.BootstrapConfigurationTest
 org.springframework.boot.Bootstrapper=\
- com.hyf.cloud.bootstrap.CustomBootstrapper
+ com.hyf.cloud.context.bootstrap.CustomBootstrapper

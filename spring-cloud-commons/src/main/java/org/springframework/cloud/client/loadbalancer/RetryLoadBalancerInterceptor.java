@@ -71,6 +71,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	@Override
 	public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) throws IOException {
+		// http://SERVICE_NAME/URI
 		final URI originalUri = request.getURI();
 		final String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
@@ -86,11 +87,14 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 							serviceInstance));
 				}
 			}
+			// 负载均衡的服务发现声明周期处理
 			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 					.getSupportedLifecycleProcessors(
 							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
 							RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
+			// 服务发现用的service-name hint
 			String hint = getHint(serviceName);
+			// 第一次调用是没有的，重试调用才有
 			if (serviceInstance == null) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Service instance retrieved from LoadBalancedRetryContext: was null. "
@@ -104,6 +108,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
 						new RetryableRequestContext(previousServiceInstance, new RequestData(request), hint));
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
+				// 根据负载均衡策略，选择一个服务实例
 				serviceInstance = loadBalancer.choose(serviceName, lbRequest);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Selected service instance: %s", serviceInstance));
@@ -122,13 +127,16 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 									lbResponse)));
 				}
 			}
+			// 适配一波请求
 			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(
 					requestFactory.createRequest(request, body, execution),
 					new RetryableRequestContext(null, new RequestData(request), hint));
 			ServiceInstance finalServiceInstance = serviceInstance;
+			// 处理服务请求
 			ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(serviceName,
 					finalServiceInstance, lbRequest);
 			int statusCode = response.getRawStatusCode();
+			// 状态码异常重试
 			if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Retrying on status code: %d", statusCode));

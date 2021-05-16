@@ -58,9 +58,11 @@ public class LoadBalancerAutoConfiguration {
 	@Autowired(required = false)
 	private List<RestTemplate> restTemplates = Collections.emptyList();
 
+	/** 暂时只有一个添加cookie的转换器 */
 	@Autowired(required = false)
 	private List<LoadBalancerRequestTransformer> transformers = Collections.emptyList();
 
+	/** 所有Bean初始化完毕后，重新自定义所有的RestTemplate 对象，添加一个拦截器，修改请求 URL */
 	@Bean
 	public SmartInitializingSingleton loadBalancedRestTemplateInitializerDeprecated(
 			final ObjectProvider<List<RestTemplateCustomizer>> restTemplateCustomizers) {
@@ -80,12 +82,13 @@ public class LoadBalancerAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(RetryMissingOrDisabledCondition.class)
+	@Conditional(RetryMissingOrDisabledCondition.class) // Retry和普通的只能启用一个
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean
 		public LoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
 				LoadBalancerRequestFactory requestFactory) {
+			// 修改URL
 			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
 		}
 
@@ -150,6 +153,7 @@ public class LoadBalancerAutoConfiguration {
 				LoadBalancerProperties properties, LoadBalancerRequestFactory requestFactory,
 				LoadBalancedRetryFactory loadBalancedRetryFactory,
 				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			// 请求的负载均衡 以及 重试拦截
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties, requestFactory,
 					loadBalancedRetryFactory, loadBalancerFactory);
 		}

@@ -1,13 +1,13 @@
 server:
   port: 8082
-#  servlet:
-#    context-path: /
+  servlet:
+    context-path: /
 
 spring:
   boot:
     enableautoconfiguration: true # 启用自动装配，优先
   cloud:
-    bootstrap: # bootstrap属性放此处无效，应该其初始化时还未解析该文件，可通过添加spring-cloud-starter-bootstrap依赖激活
+    bootstrap: # bootstrap属性放此处无效，因为其初始化时还未解析该文件，可通过添加spring-cloud-starter-bootstrap依赖激活
       enabled: true # 是否启用
       use-legacy-processing: true # 任意一个为true都会启用
       name: abc # 文件名
@@ -36,6 +36,61 @@ spring:
         - 128.0.0.1
       preferred-networks:
         - 127.0.0.1
+    discovery: # 服务发现的注册实例信息
+      enabled: true # 两个启用条件必须同时满足
+      blocking:
+        enabled: true
+      client:
+        simple:
+          instances:
+            myservice:
+              - service-id: service_aaa # 构造完毕会被 key 覆盖
+                instance-id: instance_aaa
+                host: localhost
+                port: 8080
+                secure: false
+                metadata:
+                  - aaa: bbb
+                  - ccc: ddd
+              - service-id: service_bbb
+                uri: http://bbb:8080
+            second-service:
+              - service-id: service_ccc
+                uri: http://ccc:8080
+        health-indicator:
+          enabled: true # 启用服务的健康检查
+          use-services-query: true # 是否使用重量级的 DiscoveryClient#getServices 方法检查健康
+          include-description: true # 检查后的信息是否包括客户端的描述信息
+        composite-indicator:
+          enabled: true
+    features:
+      enabled: true # 启用特色端点，展示一些指定类的信息？
+    hypermedia: # hypermedia的url刷新
+      refresh:
+        initial-delay: 1 # 初始化时延迟1秒
+        fixed-delay: 5 # 每隔5秒调度刷新
+    loadbalancer:
+      retry:
+        enabled: true # 启用负载均衡的重试机制
+        retry-on-all-operations: false # 在所有请求上重试，否则只能在GET请求上重试
+        max-retries-on-same-service-instance: 0 # 相同服务的重试次数
+        max-retries-on-next-service-instance: 1 # 下个服务的重试次数
+        retryable-status-codes: # 请求没抛异常时的返回状态码是否需要重试
+          - 404
+          - 403
+      sticky-session: # 粘性session
+        add-service-instance-cookie: true # 是否添加instance-id到请求的cookie中
+        instance-id-cookie-name: sc-lb-instance-id # cookie名称
+    httpclientfactories:
+      apache: # apache-httpclient 客户端
+        enabled: true
+      ok: # okhttp3 客户端
+        enabled: true
+    service-registry: # 抽象出 AutoServiceRegistration，供各个服务注册框架实现
+      auto-registration:
+        enabled: true # 启用服务的自动注册
+        fail-fast: false # 当没有 AutoServiceRegistration 时，快速失败
+        register-management: true # 将management端点注册进服务中
   config:
     use-legacy-processing: false
     allow-override: false # 是否允许BootstrapConfiguration获取的所有属性覆盖原本环境的属性

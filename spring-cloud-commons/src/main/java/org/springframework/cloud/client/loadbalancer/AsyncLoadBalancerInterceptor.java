@@ -39,6 +39,7 @@ public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInter
 	@Override
 	public ListenableFuture<ClientHttpResponse> intercept(final HttpRequest request, final byte[] body,
 			final AsyncClientHttpRequestExecution execution) throws IOException {
+		// http://SERVICE_NAME/URI
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
 		return this.loadBalancer.execute(serviceName, instance -> {

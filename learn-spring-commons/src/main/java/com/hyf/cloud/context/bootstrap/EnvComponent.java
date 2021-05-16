@@ -1,6 +1,5 @@
-package com.hyf.cloud.bootstrap;
+package com.hyf.cloud.context.bootstrap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 

@@ -55,6 +55,8 @@ public interface DiscoveryClient extends Ordered {
 	List<String> getServices();
 
 	/**
+	 * 相比getServices()，是一个更为轻量的检查服务健康的方法，默认为getServices()，可以重写
+	 *
 	 * Can be used to verify the client is valid and able to make calls.
 	 * <p>
 	 * A successful invocation with no exception thrown implies the client is able to make

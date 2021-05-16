@@ -46,6 +46,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 		@Autowired(required = false)
 		private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
 
+		/** 所有Bean初始化完毕后，重新自定义所有的 AsyncRestTemplate 对象，添加一个拦截器，修改请求 URL */
 		@Bean
 		public SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
 				final List<AsyncRestTemplateCustomizer> customizers) {

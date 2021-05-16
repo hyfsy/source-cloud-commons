@@ -1,4 +1,4 @@
-package com.hyf.cloud.bootstrap;
+package com.hyf.cloud.context.bootstrap;
 
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.bootstrap.BootstrapConfiguration;

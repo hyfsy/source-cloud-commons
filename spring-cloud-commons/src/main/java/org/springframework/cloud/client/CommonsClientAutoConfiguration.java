@@ -52,9 +52,9 @@ public class CommonsClientAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HealthIndicator.class)
-	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
+	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class) // 客户端的健康检查属性
 	@ConditionalOnBean(DiscoveryClient.class)
-	@ConditionalOnDiscoveryEnabled
+	@ConditionalOnDiscoveryEnabled // 两个服务发现启用标记
 	@ConditionalOnBlockingDiscoveryEnabled
 	protected static class DiscoveryLoadBalancerConfiguration {
 
@@ -74,6 +74,7 @@ public class CommonsClientAutoConfiguration {
 			return new DiscoveryCompositeHealthContributor(indicators);
 		}
 
+		/** 存放一些类信息，方便端点观察？ */
 		@Bean
 		public HasFeatures commonsFeatures() {
 			return HasFeatures.abstractFeatures(DiscoveryClient.class, LoadBalancerClient.class);
@@ -89,6 +90,7 @@ public class CommonsClientAutoConfiguration {
 		@Autowired(required = false)
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
+		/** 特色端点，暴露HasFeatures的所有类信息 */
 		@Bean
 		@ConditionalOnAvailableEndpoint
 		public FeaturesEndpoint featuresEndpoint() {
