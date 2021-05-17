@@ -24,6 +24,7 @@ package org.springframework.cloud.client.circuitbreaker;
 public abstract class CircuitBreakerFactory<CONF, CONFB extends ConfigBuilder<CONF>>
 		extends AbstractCircuitBreakerFactory<CONF, CONFB> {
 
+	// 断路器创建工厂
 	public abstract CircuitBreaker create(String id);
 
 }

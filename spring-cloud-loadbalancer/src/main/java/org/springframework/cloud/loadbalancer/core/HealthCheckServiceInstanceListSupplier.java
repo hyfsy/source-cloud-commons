@@ -62,8 +62,11 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 			LoadBalancerProperties.HealthCheck healthCheck,
 			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
 		super(delegate);
+		// 健康检查路径
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
+		// 校验服务健康的Function
 		this.aliveFunction = aliveFunction;
+		// 健康检查属性
 		this.healthCheck = healthCheck;
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
@@ -71,6 +74,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
 						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+		// 可用服务列表
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}

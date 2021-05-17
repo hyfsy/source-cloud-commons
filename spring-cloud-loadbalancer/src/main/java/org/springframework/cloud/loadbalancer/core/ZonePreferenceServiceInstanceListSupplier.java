@@ -37,6 +37,7 @@ import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
  */
 public class ZonePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
+	// 实例的meta元数据 zone
 	private final String ZONE = "zone";
 
 	private final LoadBalancerZoneConfig zoneConfig;

@@ -50,12 +50,14 @@ public class LoadBalancerAutoConfiguration {
 		this.configurations = configurations;
 	}
 
+	/** 负载均衡分区配置 */
 	@Bean
 	@ConditionalOnMissingBean
 	public LoadBalancerZoneConfig zoneConfig(Environment environment) {
 		return new LoadBalancerZoneConfig(environment.getProperty("spring.cloud.loadbalancer.zone"));
 	}
 
+	/** LoadBalancerClient 创建工厂，每个服务都会构建一个对应服务id的应用上下文 */
 	@ConditionalOnMissingBean
 	@Bean
 	public LoadBalancerClientFactory loadBalancerClientFactory() {

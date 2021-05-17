@@ -55,6 +55,8 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+
+		// @LoadBalancerClients 注解处理
 		Map<String, Object> attrs = metadata.getAnnotationAttributes(LoadBalancerClients.class.getName(), true);
 		if (attrs != null && attrs.containsKey("value")) {
 			AnnotationAttributes[] clients = (AnnotationAttributes[]) attrs.get("value");
@@ -62,6 +64,8 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 				registerClientConfiguration(registry, getClientName(client), client.get("configuration"));
 			}
 		}
+
+		// 加一个 @LoadBalancerClients 默认配置
 		if (attrs != null && attrs.containsKey("defaultConfiguration")) {
 			String name;
 			if (metadata.hasEnclosingClass()) {
@@ -72,6 +76,8 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 			}
 			registerClientConfiguration(registry, name, attrs.get("defaultConfiguration"));
 		}
+
+		// @LoadBalancerClient 注解处理
 		Map<String, Object> client = metadata.getAnnotationAttributes(LoadBalancerClient.class.getName(), true);
 		String name = getClientName(client);
 		if (name != null) {

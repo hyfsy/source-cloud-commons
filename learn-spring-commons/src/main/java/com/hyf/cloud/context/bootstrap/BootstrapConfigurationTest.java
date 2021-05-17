@@ -5,6 +5,8 @@ import org.springframework.cloud.bootstrap.BootstrapConfiguration;
 import org.springframework.context.annotation.Bean;
 
 /**
+ * 不推荐放在 @ComponentScan 能扫描到的路径下
+ *
  * @author baB_hyf
  * @date 2021/05/15
  */

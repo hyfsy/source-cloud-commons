@@ -4,8 +4,20 @@ server:
     context-path: /
 
 spring:
+  main:
+    web-application-type: none
   boot:
     enableautoconfiguration: true # 启用自动装配，优先
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
   cloud:
     bootstrap: # bootstrap属性放此处无效，因为其初始化时还未解析该文件，可通过添加spring-cloud-starter-bootstrap依赖激活
       enabled: true # 是否启用
@@ -34,12 +46,16 @@ spring:
       use-only-site-local-interfaces: false
       ignored-interfaces:
         - 128.0.0.1
+        - dock0
+        - veth.*
       preferred-networks:
         - 127.0.0.1
     discovery: # 服务发现的注册实例信息
       enabled: true # 两个启用条件必须同时满足
       blocking:
         enabled: true
+      reactive:
+        enabled: false
       client:
         simple:
           instances:
@@ -78,9 +94,22 @@ spring:
         retryable-status-codes: # 请求没抛异常时的返回状态码是否需要重试
           - 404
           - 403
-      sticky-session: # 粘性session
+      health-check:
+        initial-delay: 0
+        interval: 25
+        refetch-instances: false # 是否刷新实例列表，内部自动进行一次健康检查
+        refetch-instances-interval: 25
+        repeat-health-check: true # 重复检查，启用刷新时可改为false
+        path:
+          - default: /actuator/health
+          - service-id: /health-check-request-uri
+      sticky-session: # 会话黏连 黏性session
         add-service-instance-cookie: true # 是否添加instance-id到请求的cookie中
         instance-id-cookie-name: sc-lb-instance-id # cookie名称
+      cache: # 负载均衡缓存，@see CachingServiceInstanceListSupplier
+        enabled: true # 启用缓存，默认缓存（需要stoyanr-evictor依赖） 或 caffeine
+        ttl: 35s # 缓存时间
+        capacity: 256 # 缓存容量
     httpclientfactories:
       apache: # apache-httpclient 客户端
         enabled: true
@@ -88,7 +117,7 @@ spring:
         enabled: true
     service-registry: # 抽象出 AutoServiceRegistration，供各个服务注册框架实现
       auto-registration:
-        enabled: true # 启用服务的自动注册
+        enabled: true # 启用服务的自动注册，会自动注册 DiscoveryClient 实现
         fail-fast: false # 当没有 AutoServiceRegistration 时，快速失败
         register-management: true # 将management端点注册进服务中
   config:

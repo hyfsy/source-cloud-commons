@@ -72,6 +72,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				new DefaultRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
+		// 负载均衡实现
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
@@ -87,9 +88,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		Request lbRequest = request instanceof Request ? (Request) request : new DefaultRequest<>();
+		// 生命周期处理 - 发送请求
 		supportedLifecycleProcessors
 				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
 		try {
+			// 发送请求，返回响应
 			T response = request.apply(serviceInstance);
 			Object clientResponse = getClientResponse(response);
 			supportedLifecycleProcessors

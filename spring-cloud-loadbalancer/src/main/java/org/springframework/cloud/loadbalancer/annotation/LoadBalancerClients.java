@@ -42,6 +42,8 @@ public @interface LoadBalancerClients {
 	LoadBalancerClient[] value() default {};
 
 	/**
+	 * 会注册一个默认的 LoadBalancerClientSpecification，名称为注解定义所在类或外围类，值为此
+	 * <p>
 	 * {@link LoadBalancerClientConfigurationRegistrar} creates a
 	 * {@link LoadBalancerClientSpecification} with this as an argument. These in turn are
 	 * added as default contexts in {@link LoadBalancerClientFactory}. Configuration
