@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
  * Collects references to <code>@ConfigurationProperties</code> beans in the context and
  * its parent.
  *
- * 为所有 @ConfigurationProperties的集合
+ * 是所有 @ConfigurationProperties的集合
  *
  * @author Dave Syer
  */
@@ -74,6 +74,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		// 动态刷新的不处理
 		if (isRefreshScoped(beanName)) {
 			return bean;
 		}
